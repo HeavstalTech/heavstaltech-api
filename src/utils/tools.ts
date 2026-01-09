@@ -10,7 +10,8 @@ const HEADERS = {
 };
 
 const ignoreSSL = new https.Agent({  
-  rejectUnauthorized: false
+  rejectUnauthorized: false,
+  servername: 'inferenceengine.vyro.ai'
 });
 
 export const ssweb = async (url: string, device: 'desktop' | 'tablet' | 'phone' = 'desktop'): Promise<Buffer> => {
