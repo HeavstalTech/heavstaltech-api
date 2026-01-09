@@ -12,7 +12,7 @@ export const search = async (query: string): Promise<YouTubeSearchResult[]> => {
       if (!result.all || result.all.length === 0) {
         return reject(new Error("No results found on YouTube."));
       }
-      const data: YouTubeSearchResult[] = result.all.map((item) => {
+      const data: YouTubeSearchResult[] = result.all.map((item: any) => {
         return {
           type: item.type as 'video' | 'channel' | 'list' | 'live',
           url: item.url,
@@ -122,7 +122,7 @@ export const ytmp4 = async (url: string): Promise<YouTubeResult> => {
 export const play = async (query: string, type: 'mp3' | 'mp4' = 'mp3'): Promise<YouTubeResult> => {
   try {
     const searchResults = await yts(query);
-    const videos = searchResults.all.filter(v => v.type === 'video');
+    const videos = searchResults.all.filter((v: any) => v.type === 'video');
     if (videos.length === 0) {
       throw new Error(`No video results found for: ${query}`);
     }
