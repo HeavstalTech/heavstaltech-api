@@ -1,0 +1,57 @@
+{
+  "name": "@heavstaltech/api",
+  "version": "1.0.0",
+  "description": "A powerful multi-purpose scraper and API client for Social Media, Media processing, and Utilities. Supports ESM and CJS.",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "node test/test.js",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HeavstalTech/heavstaltech-api"
+  },
+ "homepage": "https://github.com/HeavstalTech/heavstaltech-api",
+ "bugs": {
+ "url": "https://github.com/HeavstalTech/heavstaltech-api/issues"
+  },
+  "keywords": [
+    "scraper",
+    "api",
+    "tiktok-downloader",
+    "instagram-downloader",
+    "youtube-downloader",
+    "heavstal-tech"
+  ],
+  "author": "HEAVSTAL TECH",
+  "license": "MIT",
+  "dependencies": {
+    "@distube/ytdl-core": "^4.13.5",
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "form-data": "^4.0.0",
+    "yt-search": "^2.10.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
