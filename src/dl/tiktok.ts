@@ -132,12 +132,8 @@ export const tiktokSlide = async (url: string): Promise<TikTokResult> => {
 
     const $ = cheerio.load(response.data);
     const $element = $('div.flex.flex-col.items-center.justify-center.mt-2.mb-5');
-    
-    // Check if we actually got content
     if ($element.length === 0) throw new Error("Slide not found or service unavailable");
-
     const statsDiv = $element.find('div.flex.flex-row.items-center.justify-center');
-    
     return {
       author: AUTHOR,
       status: true,
@@ -152,7 +148,6 @@ export const tiktokSlide = async (url: string): Promise<TikTokResult> => {
       downloads: statsDiv.eq(3).find('span').text().trim(),
       views: statsDiv.eq(4).find('span').text().trim()
     };
-
   } catch (error: any) {
      return {
         author: AUTHOR,
