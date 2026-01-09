@@ -53,8 +53,10 @@ async function main() {
 
   results.push(await runTest("YouTube: Search", async () => {
     const res = await api.search.youtube("No Copyright Sounds");
-    if (res.length > 0) {
-      ytUrl = res[0].url; 
+    // FIX: Ensure we pick a VIDEO, not a Channel
+    const video = res.find(r => r.type === 'video');
+    if (video) {
+      ytUrl = video.url; 
       return true;
     }
     return false;
@@ -71,7 +73,7 @@ async function main() {
       return res.url && res.title;
     }));
   } else {
-    console.log("⚠️ Skipping YouTube Downloader tests (Search failed)");
+    console.log("⚠️ Skipping YouTube Downloader tests (Search failed to find a video)");
     results.push(false);
   }
 
