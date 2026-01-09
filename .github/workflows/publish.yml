@@ -26,7 +26,6 @@ jobs:
 
       - name: Build Project (Generate Dist)
         run: npm run build
-        # This ensures the 'dist' folder exists before publishing
 
       - name: Publish to NPM
         run: npm publish --access public
