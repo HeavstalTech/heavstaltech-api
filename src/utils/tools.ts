@@ -14,6 +14,24 @@ const ignoreSSL = new https.Agent({
   servername: 'inferenceengine.vyro.ai'
 });
 
+const MORSE_MAP: Record<string, string> = {
+  'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+  'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+  'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+  'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+  'Y': '-.--', 'Z': '--..',
+  '0': '-----', '1': '.----', '2': '..---', '3': '...--', '4': '....-',
+  '5': '.....', '6': '-....', '7': '--...', '8': '---..', '9': '----.',
+  '.': '.-.-.-', ',': '--..--', '?': '..--..', "'": '.----.', '!': '-.-.--',
+  '/': '-..-.', '(': '-.--.', ')': '-.--.-', '&': '.-...', ':': '---...',
+  ';': '-.-.-.', '=': '-...-', '+': '.-.-.', '-': '-....-', '_': '..--.-',
+  '"': '.-..-.', '$': '...-..-', '@': '.--.-.',
+  ' ': '/' 
+};
+const REVERSE_MORSE = Object.fromEntries(
+  Object.entries(MORSE_MAP).map(([char, code]) => [code, char])
+);
+
 export const ssweb = async (url: string, device: 'desktop' | 'tablet' | 'phone' = 'desktop'): Promise<Buffer> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -109,6 +127,30 @@ export const wattpad = async (query: string): Promise<any[]> => {
   } catch (error: any) {
     throw new Error(`Wattpad Failed: ${error.message}`);
   }
+};
+
+/**
+ * Morse Code Engine
+ * Encodes Text to Morse OR Decodes Morse to Text
+ */
+export const morse = async (input: string, mode: 'encode' | 'decode' = 'encode'): Promise<string> => {
+  return new Promise((resolve) => {
+    if (mode === 'encode') {
+      const result = input
+        .toUpperCase()
+        .split('')
+        .map(char => MORSE_MAP[char] || char)
+        .join(' ');
+      resolve(result);
+    } else {
+      const result = input
+        .split(' ') 
+        .map(code => REVERSE_MORSE[code] || (code === '/' ? ' ' : code))
+        .join('')
+        .replace(/\s+/g, ' ').trim();
+      resolve(result);
+    }
+  });
 };
 
 export const chords = async (query: string): Promise<any> => {
