@@ -102,6 +102,29 @@ console.log(fb);
 
 ---
 
+#### Twitter / X (Video & Audio)
+Download videos from **Twitter** or **X.com**. Automatically handles link conversion and provides HD/SD options.
+
+> **Alias:** You can use `downloader.twitter` or `downloader.xdl`.
+
+```javascript
+// Supports both twitter.com and x.com links
+const video = await downloader.xdl("https://x.com/ElonMusk/status/...");
+
+console.log(video);
+/* Output:
+{
+  status: true,
+  desc: "Tweet Caption...",
+  thumbnail: "https://...",
+  video_sd: "https://...", // Standard Definition
+  video_hd: "https://..."  // High Definition
+}
+*/
+```
+
+---
+
 ### 2. YouTube (Search & Download)
 
 **Note:** Powered by `@distube/ytdl-core` and `yt-search`.
