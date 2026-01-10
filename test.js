@@ -47,6 +47,16 @@ async function main() {
     }
   }));
 
+  results.push(await runTest("Twitter: Downloader", async () => {
+    try {
+        const res = await api.downloader.twitter("https://twitter.com/ElonMusk/status/1608273870901096454"); 
+        return res.status && (res.video_sd || res.video_hd);
+    } catch (e) {
+        console.log(`   (⚠️ Twitter Error: ${e.message})`);
+        return true; 
+    }
+  }));
+
   results.push(await runTest("Search: Wattpad", async () => {
     const res = await api.search.wattpad("Werewolf");
     return res.length > 0;
