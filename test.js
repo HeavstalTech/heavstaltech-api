@@ -49,7 +49,7 @@ async function main() {
 
   results.push(await runTest("Twitter: Downloader", async () => {
     try {
-        const res = await api.downloader.twitter("https://twitter.com/ElonMusk/status/1608273870901096454"); 
+        const res = await api.downloader.twitter("https://x.com/elonmusk/status/2009777814459781422?s=20"); 
         return res.status && (res.video_sd || res.video_hd);
     } catch (e) {
         console.log(`   (⚠️ Twitter Error: ${e.message})`);
