@@ -2,7 +2,7 @@ import { tiktok, tiktokSlide } from './dl/tiktok';
 import { igdl, fbdl } from './dl/social';
 import { twitter } from './dl/twitter';
 import { search as ytSearch, ytmp3, ytmp4, play } from './dl/youtube';
-import { ssweb, remini, styleText, wattpad, chords } from './utils/tools';
+import { ssweb, remini, styleText, wattpad, chords, morse } from './utils/tools';
 
 export * from './types';
 export { 
@@ -20,7 +20,8 @@ export {
   remini, 
   styleText, 
   wattpad, 
-  chords
+  chords,
+  morse
 };
 export const downloader = {
   tiktok,
@@ -41,7 +42,8 @@ export const search = {
 export const tools = {
   ssweb,
   remini,
-  styleText
+  styleText,
+  morse
 };
 export default {
   downloader,
