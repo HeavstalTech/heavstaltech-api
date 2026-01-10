@@ -11,6 +11,7 @@ export {
   igdl, 
   fbdl,
   twitter,
+  twitter as xdl,
   ytSearch, 
   ytmp3, 
   ytmp4, 
@@ -27,6 +28,7 @@ export const downloader = {
   igdl,
   fbdl,
   twitter,
+  xdl: twitter,
   ytmp3,
   ytmp4,
   play
