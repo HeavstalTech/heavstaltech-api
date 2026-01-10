@@ -216,8 +216,7 @@ import { tools } from '@heavstaltech/api';
 const encoded = await tools.morse("HELLO WORLD", "encode");
 console.log(encoded); 
 // Output: .... . .-.. .-.. --- / .-- --- .-. .-.. -..
-```
-```
+
 // 2. Decode (Morse -> Text)
 const decoded = await tools.morse("... --- ...", "decode");
 console.log(decoded); 
