@@ -73,3 +73,13 @@ export interface UtilsResult {
   status: boolean;
   data: Buffer | string | any;
 }
+
+export interface TwitterResult {
+  author: Author;
+  status: boolean;
+  desc: string;
+  thumbnail: string;
+  video_sd?: string;
+  video_hd?: string;
+  audio?: string;
+}
