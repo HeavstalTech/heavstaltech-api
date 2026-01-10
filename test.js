@@ -57,6 +57,12 @@ async function main() {
     }
   }));
 
+  results.push(await runTest("Tools: Morse Code", async () => {
+    const encoded = await api.tools.morse("SOS", "encode");
+    const decoded = await api.tools.morse("... --- ...", "decode");
+    return encoded === "... --- ..." && decoded === "SOS";
+  }));
+
   results.push(await runTest("Search: Wattpad", async () => {
     const res = await api.search.wattpad("Werewolf");
     return res.length > 0;
