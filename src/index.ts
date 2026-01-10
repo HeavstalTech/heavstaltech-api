@@ -1,5 +1,6 @@
 import { tiktok, tiktokSlide } from './dl/tiktok';
 import { igdl, fbdl } from './dl/social';
+import { twitter } from './dl/twitter';
 import { search as ytSearch, ytmp3, ytmp4, play } from './dl/youtube';
 import { ssweb, remini, styleText, wattpad, chords } from './utils/tools';
 
@@ -8,7 +9,8 @@ export {
   tiktok, 
   tiktokSlide, 
   igdl, 
-  fbdl, 
+  fbdl,
+  twitter,
   ytSearch, 
   ytmp3, 
   ytmp4, 
@@ -24,6 +26,7 @@ export const downloader = {
   tiktokSlide,
   igdl,
   fbdl,
+  twitter,
   ytmp3,
   ytmp4,
   play
