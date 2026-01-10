@@ -206,6 +206,24 @@ const fonts = await tools.styleText("Heavstal Tech");
 console.log(fonts);
 ```
 
+#### Morse Code Converter
+Convert text to International Morse Code and vice versa. Supports letters, numbers, and punctuation.
+
+```javascript
+import { tools } from '@heavstaltech/api';
+
+// 1. Encode (Text -> Morse)
+const encoded = await tools.morse("HELLO WORLD", "encode");
+console.log(encoded); 
+// Output: .... . .-.. .-.. --- / .-- --- .-. .-.. -..
+```
+```
+// 2. Decode (Morse -> Text)
+const decoded = await tools.morse("... --- ...", "decode");
+console.log(decoded); 
+// Output: SOS
+```
+
 ---
 
 ## 📝 License
