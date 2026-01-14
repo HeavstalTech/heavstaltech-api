@@ -240,6 +240,20 @@ const bufferJP = await tools.tts("Konnichiwa", "ja");
 fs.writeFileSync("voice.mp3", buffer);
 ```
 
+
+### 5. Image Makers (Ephoto360)
+
+Generate high-quality text effects like Glitch, Neon, and Gold.
+
+**Supported Styles:** `glitchtext`, `writetext`, `advancedglow`, `typographytext`, `pixelglitch`, `neonglitch`, `flagtext`, `flag3dtext`, `deletingtext`, `blackpinkstyle`, `glowingtext`, `underwatertext`, `logomaker`, `cartoonstyle`, `papercutstyle`, `watercolortext`, `effectclouds`, `blackpinklogo`, `gradienttext`, `summerbeach`, `luxurygold`, `multicoloredneon`, `sandsummer`, `galaxywallpaper`, `1917style`, `makingneon`, `royaltext`, `freecreate`, `galaxystyle`, `lighteffects`
+
+```javascript
+import { tools } from '@heavstaltech/api';
+
+const imageUrl = await tools.ephoto("glitchtext", "Heavstal Tech");
+console.log(imageUrl); 
+// Output: https://en.ephoto360.com/....jpg
+```
 ---
 
 ## 📝 License
