@@ -223,6 +223,23 @@ console.log(decoded);
 // Output: SOS
 ```
 
+
+#### Text to Speech (Google TTS)
+Convert text into audio using Google's engine.
+
+```javascript
+import { tools } from '@heavstaltech/api';
+import fs from 'fs';
+
+// 1. English (Default)
+const buffer = await tools.tts("Hello World", "en");
+
+// 2. Other Languages (e.g., Japanese 'ja', Spanish 'es')
+const bufferJP = await tools.tts("Konnichiwa", "ja");
+
+fs.writeFileSync("voice.mp3", buffer);
+```
+
 ---
 
 ## 📝 License
