@@ -153,6 +153,35 @@ export const morse = async (input: string, mode: 'encode' | 'decode' = 'encode')
   });
 };
 
+export const tts = async (text: string, lang: string = 'en'): Promise<Buffer> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const GOOGLE_TTS_URL = 'https://translate.google.com/translate_tts';
+      
+      // Limit text length (Google blocks long requests ~200 chars)
+      if (text.length > 200) {
+        throw new Error("Text is too long. Maximum 200 characters.");
+      }
+
+      const { data } = await axios.get(GOOGLE_TTS_URL, {
+        params: {
+          ie: 'UTF-8',
+          q: text,
+          tl: lang,
+          client: 'tw-ob' // The magic key to bypass auth
+        },
+        responseType: 'arraybuffer', // We need raw audio data
+        headers: HEADERS
+      });
+
+      resolve(data);
+    } catch (error: any) {
+      reject(new Error(`TTS Failed: ${error.message}`));
+    }
+  });
+};
+
+
 export const chords = async (query: string): Promise<any> => {
   try {
     const searchUrl = `https://www.gitagram.com/?s=${encodeURIComponent(query).replace(/%20/g, "+")}`;
