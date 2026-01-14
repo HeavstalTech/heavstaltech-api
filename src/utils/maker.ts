@@ -1,11 +1,11 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import FormData from 'form-data';
-import { AUTHOR } from '../types';
 
 const USER_AGENTS = [
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36'
 ];
 
 const STYLE_MAP: Record<string, string> = {
@@ -46,28 +46,35 @@ export const ephoto = async (style: string, text: string): Promise<string> => {
     try {
       const targetUrl = STYLE_MAP[style];
       if (!targetUrl) throw new Error(`Invalid style. Available: ${Object.keys(STYLE_MAP).join(', ')}`);
-      const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-      const commonHeaders = {
-        'User-Agent': userAgent,
+
+      const headers = {
+        'User-Agent': USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)],
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9'
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1'
       };
 
-      const getPage = await axios.get(targetUrl, { headers: commonHeaders });
-      const cookies = getPage.headers['set-cookie']?.join('; ') || '';
+      const getPage = await axios.get(targetUrl, { headers });
+      const cookies = getPage.headers['set-cookie']?.map(c => c.split(';')[0]).join('; ') || '';
       const $ = cheerio.load(getPage.data);
       const formData = new FormData();
-      const token = $('input[name="token"]').val();
-      const build_server = $('input[name="build_server"]').val();
-      const build_server_id = $('input[name="build_server_id"]').val();
-      if (!token) throw new Error("Failed to fetch token from Ephoto360");
+      const form = $('form[id="createimage"], form[action*="create-image"]');
+      if (!form.length) throw new Error("Could not find generation form on Ephoto360");
+
+      form.find('input').each((i, elem) => {
+        const name = $(elem).attr('name');
+        const value = $(elem).attr('value');
+        const type = $(elem).attr('type');
+        if (name && value && type !== 'submit' && !name.includes('text')) {
+            formData.append(name, value);
+        }
+      });
+
       formData.append('text[]', text);
-      formData.append('token', token);
-      formData.append('build_server', build_server);
-      formData.append('build_server_id', build_server_id);
       const postRes = await axios.post(targetUrl, formData, {
         headers: {
-          ...commonHeaders,
+          ...headers,
           ...formData.getHeaders(),
           'Cookie': cookies,
           'Referer': targetUrl,
@@ -80,7 +87,10 @@ export const ephoto = async (style: string, text: string): Promise<string> => {
       
       if (!formValue) {
         const jsonCheck = typeof postRes.data === 'object' ? postRes.data : null;
-        throw new Error(jsonCheck?.info || "Failed to initiate creation (Server rejected form data)");
+        if (jsonCheck?.success) {
+             return resolve('https://en.ephoto360.com' + jsonCheck.image);
+        }
+        throw new Error("Failed to initiate creation (Form value missing)");
       }
       
       const json = JSON.parse(formValue);
@@ -93,7 +103,7 @@ export const ephoto = async (style: string, text: string): Promise<string> => {
       finalData.append('sign', json.sign);
       const finalRes = await axios.post('https://en.ephoto360.com/effect/create-image', finalData, {
         headers: {
-          ...commonHeaders,
+          ...headers,
           ...finalData.getHeaders(),
           'Cookie': cookies,
           'Referer': targetUrl,
