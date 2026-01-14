@@ -68,6 +68,15 @@ async function main() {
     return res.length > 0;
   }));
 
+  results.push(await runTest("Tools: TTS (Google)", async () => {
+    try {
+        const buffer = await api.tools.tts("Hello Heavstal", "en");
+        return Buffer.isBuffer(buffer) && buffer.length > 0;
+    } catch (e) {
+        return false;
+    }
+  }));
+
   results.push(await runTest("Search: Chords", async () => {
     const res = await api.search.chords("Adele Hello");
     return res && res.chord;
