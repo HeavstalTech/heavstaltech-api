@@ -46,45 +46,44 @@ export const ephoto = async (style: string, text: string): Promise<string> => {
     try {
       const targetUrl = STYLE_MAP[style];
       if (!targetUrl) throw new Error(`Invalid style. Available: ${Object.keys(STYLE_MAP).join(', ')}`);
-
-      const headers = {
-        'User-Agent': USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)],
-        'Content-Type': 'application/x-www-form-urlencoded'
+      const userAgent = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+      const commonHeaders = {
+        'User-Agent': userAgent,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9'
       };
 
-      // 1. Get Token and Cookies
-      const getPage = await axios.get(targetUrl, { headers });
+      const getPage = await axios.get(targetUrl, { headers: commonHeaders });
+      const cookies = getPage.headers['set-cookie']?.join('; ') || '';
       const $ = cheerio.load(getPage.data);
-      
       const formData = new FormData();
       const token = $('input[name="token"]').val();
       const build_server = $('input[name="build_server"]').val();
       const build_server_id = $('input[name="build_server_id"]').val();
-
       if (!token) throw new Error("Failed to fetch token from Ephoto360");
-
       formData.append('text[]', text);
       formData.append('token', token);
       formData.append('build_server', build_server);
       formData.append('build_server_id', build_server_id);
-
-      // 2. Post Data
       const postRes = await axios.post(targetUrl, formData, {
         headers: {
-          ...headers,
+          ...commonHeaders,
           ...formData.getHeaders(),
-          'Cookie': getPage.headers['set-cookie']?.join('; ')
+          'Cookie': cookies,
+          'Referer': targetUrl,
+          'Origin': 'https://en.ephoto360.com'
         }
       });
 
       const $post = cheerio.load(postRes.data);
       const formValue = $post('div#form_value').text();
       
-      if (!formValue) throw new Error("Failed to initiate creation");
+      if (!formValue) {
+        const jsonCheck = typeof postRes.data === 'object' ? postRes.data : null;
+        throw new Error(jsonCheck?.info || "Failed to initiate creation (Server rejected form data)");
+      }
       
       const json = JSON.parse(formValue);
-
-      // 3. Final Execution
       const finalData = new FormData();
       finalData.append('id_share', json.id_share);
       finalData.append('id_parent', json.id_parent);
@@ -92,23 +91,22 @@ export const ephoto = async (style: string, text: string): Promise<string> => {
       finalData.append('token', json.token);
       finalData.append('uid', json.uid);
       finalData.append('sign', json.sign);
-
       const finalRes = await axios.post('https://en.ephoto360.com/effect/create-image', finalData, {
         headers: {
-          ...headers,
+          ...commonHeaders,
           ...finalData.getHeaders(),
-          'Cookie': getPage.headers['set-cookie']?.join('; ')
+          'Cookie': cookies,
+          'Referer': targetUrl,
+          'Origin': 'https://en.ephoto360.com'
         }
       });
 
       if (finalRes.data.success) {
-        // The API returns a server path, we need to construct the full URL
         const fullUrl = 'https://en.ephoto360.com' + finalRes.data.image;
         resolve(fullUrl);
       } else {
-        throw new Error("API returned failure");
+        throw new Error("API returned failure in final step");
       }
-
     } catch (error: any) {
       reject(new Error(`Ephoto Failed: ${error.message}`));
     }
