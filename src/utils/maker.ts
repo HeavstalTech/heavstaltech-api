@@ -3,9 +3,8 @@ import * as cheerio from 'cheerio';
 import FormData from 'form-data';
 
 const USER_AGENTS = [
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36'
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
 ];
 
 const STYLE_MAP: Record<string, string> = {
@@ -59,13 +58,21 @@ export const ephoto = async (style: string, text: string): Promise<string> => {
       const cookies = getPage.headers['set-cookie']?.map(c => c.split(';')[0]).join('; ') || '';
       const $ = cheerio.load(getPage.data);
       const formData = new FormData();
-      const form = $('form[id="createimage"], form[action*="create-image"]');
-      if (!form.length) throw new Error("Could not find generation form on Ephoto360");
-
+      let form = $('input[name="text[]"]').closest('form');
+      if (!form.length) form = $('form[id="createimage"]');
+      if (!form.length) form = $('form[action*="create-image"]');
+      if (!form.length) {
+        const title = $('title').text();
+        if (title.includes('Cloudflare') || title.includes('Human')) {
+            throw new Error("Ephoto360 blocked the request (Cloudflare/IP Block)");
+        }
+        throw new Error("Could not find generation form on Ephoto360");
+      }
       form.find('input').each((i, elem) => {
         const name = $(elem).attr('name');
         const value = $(elem).attr('value');
         const type = $(elem).attr('type');
+
         if (name && value && type !== 'submit' && !name.includes('text')) {
             formData.append(name, value);
         }
@@ -84,13 +91,12 @@ export const ephoto = async (style: string, text: string): Promise<string> => {
 
       const $post = cheerio.load(postRes.data);
       const formValue = $post('div#form_value').text();
-      
       if (!formValue) {
         const jsonCheck = typeof postRes.data === 'object' ? postRes.data : null;
         if (jsonCheck?.success) {
              return resolve('https://en.ephoto360.com' + jsonCheck.image);
         }
-        throw new Error("Failed to initiate creation (Form value missing)");
+        throw new Error("Failed to initiate creation (Server rejected form data)");
       }
       
       const json = JSON.parse(formValue);
@@ -101,6 +107,7 @@ export const ephoto = async (style: string, text: string): Promise<string> => {
       finalData.append('token', json.token);
       finalData.append('uid', json.uid);
       finalData.append('sign', json.sign);
+
       const finalRes = await axios.post('https://en.ephoto360.com/effect/create-image', finalData, {
         headers: {
           ...headers,
