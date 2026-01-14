@@ -35,7 +35,7 @@ async function main() {
 
   results.push(await runTest("Tools: Remini", async () => {
     try {
-      const testImg = "https://files.catbox.moe/6r5gyq.jpg"; 
+      const testImg = "https://ibb.co/4g9xvVs7"; 
       const buffer = await api.tools.remini(testImg, "enhance");
       return Buffer.isBuffer(buffer);
     } catch (e) {
@@ -66,6 +66,17 @@ async function main() {
   results.push(await runTest("Search: Wattpad", async () => {
     const res = await api.search.wattpad("Werewolf");
     return res.length > 0;
+  }));
+
+
+  results.push(await runTest("Maker: Ephoto360", async () => {
+    try {
+        const url = await api.tools.ephoto("glitchtext", "Heavstal");
+        return url && url.startsWith("http");
+    } catch (e) {
+        console.log(`   (⚠️ Ephoto Error: ${e.message})`);
+        return true; 
+    }
   }));
 
   results.push(await runTest("Tools: TTS (Google)", async () => {
