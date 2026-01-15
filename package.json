@@ -1,7 +1,7 @@
 {
   "name": "@heavstaltech/api",
-  "version": "1.0.4",
-  "description": "A powerful multi-purpose scraper and API client for Social Media, Media processing, and Utilities. Supports ESM and CJS.",
+  "version": "1.0.5",
+  "description": "A powerful multi-purpose scraper and API client. Supports ESM and CJS. Supports JavaScript & Typescript",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -25,16 +25,14 @@
     "type": "git",
     "url": "https://github.com/HeavstalTech/heavstaltech-api"
   },
- "homepage": "https://github.com/HeavstalTech/heavstaltech-api",
+ "homepage": "https://heavstal-tech.vercel.app",
  "bugs": {
  "url": "https://github.com/HeavstalTech/heavstaltech-api/issues"
   },
   "keywords": [
     "scraper",
     "api",
-    "tiktok-downloader",
-    "instagram-downloader",
-    "youtube-downloader",
+    "downloader",
     "heavstal-tech"
   ],
   "author": "HEAVSTAL TECH",
