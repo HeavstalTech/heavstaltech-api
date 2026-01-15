@@ -26,7 +26,7 @@ const fetchLrcLib = async (query: string): Promise<LyricsResult> => {
     status: true,
     title: track.trackName,
     artist: track.artistName,
-    image: track.albumArt || "",
+    image: track.albumArt || "https://ibb.co/fVyg0TN6",
     url: `https://lrclib.net/api/get/${track.id}`,
     lyrics: track.plainLyrics || track.syncedLyrics
   };
