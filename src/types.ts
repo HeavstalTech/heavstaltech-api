@@ -83,3 +83,13 @@ export interface TwitterResult {
   video_hd?: string;
   audio?: string;
 }
+
+export interface LyricsResult {
+  author: Author;
+  status: boolean;
+  title: string;
+  artist: string;
+  image: string;
+  url: string;
+  lyrics: string;
+}
