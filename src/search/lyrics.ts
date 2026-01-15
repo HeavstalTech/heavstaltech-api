@@ -1,106 +1,64 @@
 import axios from 'axios';
-import * as cheerio from 'cheerio';
 import { AUTHOR, LyricsResult } from '../types';
 
 const USER_AGENTS = [
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 ];
 
-const getRandomHeaders = (referer: string) => ({
-  'User-Agent': USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)],
-  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-  'Accept-Language': 'en-US,en;q=0.9',
-  'Referer': referer
+const getRandomHeaders = () => ({
+  'User-Agent': USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]
 });
 
-const scrapeGenius = async (query: string): Promise<LyricsResult> => {
-  const searchUrl = `https://genius.com/api/search/multi?per_page=5&q=${encodeURIComponent(query)}`;
-  
-  const { data } = await axios.get(searchUrl, { 
-    headers: { ...getRandomHeaders('https://genius.com/'), 'Accept': 'application/json, text/plain, */*' } 
-  });
-  
-  const sections = data.response?.sections || [];
-  const songSection = sections.find((s: any) => s.type === 'song');
-  
-  if (!songSection || !songSection.hits || songSection.hits.length === 0) {
-    throw new Error("No songs found on Genius.");
+const fetchLrcLib = async (query: string): Promise<LyricsResult> => {
+  const searchUrl = `https://lrclib.net/api/search?q=${encodeURIComponent(query)}`;
+  const { data } = await axios.get(searchUrl, { headers: getRandomHeaders() });
+  if (!Array.isArray(data) || data.length === 0) {
+    throw new Error("No lyrics found on LRCLIB.");
   }
-
-  const hit = songSection.hits[0].result;
-  const songUrl = hit.url;
-  const title = hit.title;
-  const artist = hit.artist_names;
-  const image = hit.song_art_image_thumbnail_url;
-
-  const pageRes = await axios.get(songUrl, { headers: getRandomHeaders('https://genius.com/') });
-  const $ = cheerio.load(pageRes.data);
-
-  let lyricsText = '';
   
-  $('div[data-lyrics-container="true"]').each((i, elem) => {
-    $(elem).find('br').replaceWith('\n');
-    lyricsText += $(elem).text() + '\n\n';
-  });
-
-  lyricsText = lyricsText.trim();
-
-  if (!lyricsText) lyricsText = $('.lyrics').text().trim();
-  if (!lyricsText) throw new Error("Could not parse lyrics from Genius page.");
-
+  const track = data.find((t: any) => t.plainLyrics) || data[0];
+  if (!track.plainLyrics && !track.syncedLyrics) {
+      throw new Error("Track found but no lyrics content.");
+  }
   return {
     author: AUTHOR,
     status: true,
-    title,
-    artist,
-    image,
-    url: songUrl,
-    lyrics: lyricsText
+    title: track.trackName,
+    artist: track.artistName,
+    image: track.albumArt || "",
+    url: `https://lrclib.net/api/get/${track.id}`,
+    lyrics: track.plainLyrics || track.syncedLyrics
   };
 };
 
-const scrapeLyricsCom = async (query: string): Promise<LyricsResult> => {
-  const searchUrl = `https://www.lyrics.com/serp.php?st=${encodeURIComponent(query)}&stype=1`;
-  
-  const { data } = await axios.get(searchUrl, { headers: getRandomHeaders('https://www.lyrics.com/') });
-  const $ = cheerio.load(data);
+const fetchGenius = async (query: string): Promise<LyricsResult> => {
+  const searchUrl = `https://genius.com/api/search/multi?per_page=1&q=${encodeURIComponent(query)}`;
+  const { data } = await axios.get(searchUrl, { 
+      headers: { ...getRandomHeaders(), 'Referer': 'https://genius.com/' } 
+  });
 
-  const firstResult = $('.best-matches .bm-label a').first();
-  if (!firstResult.length) throw new Error("No songs found on Lyrics.com");
-
-  const link = 'https://www.lyrics.com' + firstResult.attr('href');
-  const title = firstResult.text();
-  
-  const pageRes = await axios.get(link, { headers: getRandomHeaders('https://www.lyrics.com/') });
-  const $$ = cheerio.load(pageRes.data);
-
-  const lyricsText = $$('pre#lyric-body-text').text().trim();
-  const artist = $$('h3.lyric-artist a').text().trim() || 'Unknown Artist';
-  const image = $$('img.album-thumb').attr('src') || '';
-
-  if (!lyricsText) throw new Error("Could not parse lyrics from Lyrics.com");
-
+  const hit = data.response?.sections?.find((s: any) => s.type === 'song')?.hits?.[0]?.result;
+  if (!hit) throw new Error("No songs found on Genius.");
   return {
     author: AUTHOR,
     status: true,
-    title,
-    artist,
-    image,
-    url: link,
-    lyrics: lyricsText
+    title: hit.title,
+    artist: hit.artist_names,
+    image: hit.song_art_image_thumbnail_url,
+    url: hit.url,
+    lyrics: `[Lyrics available at source]\n${hit.url}`
   };
 };
 
 export const lyrics = async (query: string): Promise<LyricsResult> => {
   try {
-    return await scrapeGenius(query);
-  } catch (error: any) {
+    return await fetchLrcLib(query);
+  } catch (lrcError) {
     try {
-      return await scrapeLyricsCom(query);
-    } catch (fallbackError: any) {
-      throw new Error(`All sources failed. Genius: ${error.message}. Fallback: ${fallbackError.message}`);
+        return await fetchGenius(query);
+    } catch (geniusError: any) {
+        throw new Error(`Lyrics lookup failed. LRCLIB: ${lrcError}. Genius: ${geniusError.message}`);
     }
   }
 };
