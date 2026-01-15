@@ -241,7 +241,7 @@ fs.writeFileSync("voice.mp3", buffer);
 ```
 
 
-### 5. Image Makers (Ephoto360)
+### 5. Image Makers (Ephoto360 - Temporarily Unavailable)
 
 Generate high-quality text effects like Glitch, Neon, and Gold.
 
@@ -254,6 +254,21 @@ const imageUrl = await tools.ephoto("glitchtext", "Heavstal Tech");
 console.log(imageUrl); 
 // Output: https://en.ephoto360.com/....jpg
 ```
+
+
+#### Lyrics Search
+Fetch song lyrics and metadata. Uses a robust multi-source engine (LRCLIB + Genius).
+
+```javascript
+import { search } from '@heavstaltech/api';
+
+const song = await search.lyrics("Kendrick Lamar DNA");
+
+console.log(`Title: ${song.title}`);
+console.log(`Artist: ${song.artist}`);
+console.log(`Lyrics:\n${song.lyrics}`);
+```
+
 ---
 
 ## 📝 License
