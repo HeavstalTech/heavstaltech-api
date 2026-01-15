@@ -25,16 +25,18 @@ interface LyricsResult {
   lyrics: string;
 }
 
-export const genius = async (query: string): Promise<LyricsResult> => {
+export const lyrics = async (query: string): Promise<LyricsResult> => {
   return new Promise(async (resolve, reject) => {
     try {
       const searchUrl = `https://genius.com/api/search/multi?per_page=5&q=${encodeURIComponent(query)}`;
+      
       const { data } = await axios.get(searchUrl, { headers: getRandomHeaders() });
+      
       const sections = data.response?.sections || [];
       const songSection = sections.find((s: any) => s.type === 'song');
       
       if (!songSection || !songSection.hits || songSection.hits.length === 0) {
-        throw new Error("No songs found on Genius.");
+        throw new Error("No songs found.");
       }
 
       const hit = songSection.hits[0].result;
@@ -42,6 +44,7 @@ export const genius = async (query: string): Promise<LyricsResult> => {
       const title = hit.title;
       const artist = hit.artist_names;
       const image = hit.song_art_image_thumbnail_url;
+
       const pageRes = await axios.get(songUrl, { 
         headers: {
             ...getRandomHeaders(),
@@ -50,19 +53,22 @@ export const genius = async (query: string): Promise<LyricsResult> => {
       });
 
       const $ = cheerio.load(pageRes.data);
-      let lyrics = '';
+
+      let lyricsText = '';
       
       $('div[data-lyrics-container="true"]').each((i, elem) => {
         $(elem).find('br').replaceWith('\n');
-        lyrics += $(elem).text() + '\n\n';
+        lyricsText += $(elem).text() + '\n\n';
       });
 
-      lyrics = lyrics.trim();
-      if (!lyrics) {
-        lyrics = $('.lyrics').text().trim();
+      lyricsText = lyricsText.trim();
+
+      if (!lyricsText) {
+        lyricsText = $('.lyrics').text().trim();
       }
 
-      if (!lyrics) throw new Error("Could not parse lyrics from page.");
+      if (!lyricsText) throw new Error("Could not parse lyrics from page.");
+
       const result: LyricsResult = {
         author: AUTHOR,
         status: true,
@@ -70,14 +76,16 @@ export const genius = async (query: string): Promise<LyricsResult> => {
         artist,
         image,
         url: songUrl,
-        lyrics
+        lyrics: lyricsText
       };
+
       resolve(result);
+
     } catch (error: any) {
       reject({
         author: AUTHOR,
         status: false,
-        message: error.message || "Genius Scraper Failed"
+        message: error.message || "Lyrics Scraper Failed"
       });
     }
   });
