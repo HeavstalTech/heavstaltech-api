@@ -3,7 +3,7 @@ import { igdl, fbdl } from './dl/social';
 import { twitter } from './dl/twitter';
 import { search as ytSearch, ytmp3, ytmp4, play } from './dl/youtube';
 import { ssweb, remini, styleText, wattpad, chords, morse, tts } from './utils/tools';
-import { ephoto } from './utils/maker';
+// import { ephoto } from './utils/maker';
 import { lyrics } from './search/lyrics';
 
 export * from './types';
@@ -26,7 +26,7 @@ export {
   chords,
   morse,
   tts,
-  ephoto,
+ // ephoto,
   lyrics
 };
 
@@ -55,7 +55,7 @@ export const tools = {
   styleText,
   morse,
   tts,
-  ephoto
+//  ephoto
 };
 
 export default {
