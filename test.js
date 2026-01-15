@@ -49,7 +49,7 @@ async function main() {
 
   results.push(await runTest("Search: Lyrics (Genius)", async () => {
     try {
-        const res = await api.search.lyrics("Kendrick Lamar DNA");
+        const res = await api.search.lyrics("Rema fun");
         return res.status && res.lyrics.length > 0;
     } catch (e) {
         console.log(`   (⚠️ Lyrics Error: ${e.message})`);
